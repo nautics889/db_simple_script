@@ -3,19 +3,9 @@ import logo from './logo.svg';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import './App.css';
 
-function Output(props) {
+function OutputLine(props) {
   return (
-    <div>
-      output: {props.output}
-    </div>
-  )
-}
-
-function Input(props) {
-  return (
-    <div>
-      input
-    </div>
+    <p>{props.content}</p>
   )
 }
 
@@ -24,25 +14,32 @@ class Console extends React.Component {
     super(props);
     this.state = {
       userInput: '...',
-      toOutput: '...'
+      outputArray: [<OutputLine content='initial command'/>, ],
     };
 
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(e) {
-    this.setState({userInput: e.target.value});
+    this.setState({
+      userInput: <OutputLine content={e.target.value}/>
+    });
   }
 
   render() {
     return (
       <div>
-        <Output output={this.state.toOutput}></Output>
+        {this.state.outputArray}
         <KeyboardEventHandler
           handleKeys={['enter']}
           handleFocusableElements={true}
-          onKeyEvent={(key, e) => this.setState({toOutput: this.state.userInput})} />
-        <input type="text" defaultValue={this.state.userInput} onChange={this.handleChange} />
+          onKeyEvent={(key, e) => {
+            let newOutput = [...this.state.outputArray, this.state.userInput];
+            this.setState({outputArray: newOutput});
+          }} />
+        <div>
+          <input type="text" defaultValue={this.state.userInput} onChange={this.handleChange} />
+        </div>
       </div>
     )
   }
