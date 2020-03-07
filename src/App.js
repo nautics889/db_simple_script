@@ -1,5 +1,4 @@
 import React from 'react';
-import logo from './logo.svg';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import './App.css';
 
@@ -9,21 +8,64 @@ function OutputLine(props) {
   )
 }
 
+function File(props) {
+  let toOutput;
+  switch (props.command) {
+    case 'cat':
+      toOutput = props.content;
+      break;
+    default:
+      toOutput = props.name;
+  }
+  return (
+    <p>{toOutput}</p>
+  )
+}
+
+const fileMap = new Map();
+fileMap.set('gluck.txt', {
+  name: 'gluck.txt',
+  content: 'new line \n'
+});
+fileMap.set('bar.txt', {
+  name: 'bar.txt',
+  content: 'i am bar \n'
+});
+
 class Console extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       userInput: '...',
-      outputArray: [<OutputLine content='initial command'/>, ],
+      outputArray: [<OutputLine content='initial command'/>, 
+                    <OutputLine content='second command'/>],
+      files: fileMap,
     };
 
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(e) {
-    this.setState({
-      userInput: <OutputLine content={e.target.value}/>
-    });
+    let splittedCommand = e.target.value.split(' ');
+
+    if (splittedCommand[0] === 'cat') {
+      const file = fileMap.get(splittedCommand[1]);
+      if (file) {
+        this.setState({
+          userInput: <File name={file.name} content={file.content} command='cat'/>
+        });
+      }
+      else {
+        this.setState({
+          userInput: <OutputLine content={`user: ${e.target.value}`}/>
+        });
+      }
+    }
+    else {
+      this.setState({
+        userInput: <OutputLine content={`user: ${e.target.value}`}/>
+      });
+    }
   }
 
   render() {
