@@ -32,6 +32,22 @@ fileMap.set('bar.txt', {
   content: 'i am bar \n'
 });
 
+const commandHandlerMap = new Map();
+commandHandlerMap.set('cat', (...args) => {
+  const file = fileMap.get(args[0]);
+  if (file) {
+    return <File name={file.name} content={file.content} command='cat'/>
+  }
+  return <OutputLine content={`cat: ${args[args.length - 1]}: No such file or directory`}/>
+})
+commandHandlerMap.set('ls', (...args) => {
+  let files = [];
+  fileMap.forEach((file) => {
+    files.push(<File name={file.name} content={file.content} command='ls'/>);
+  })
+  return files;
+})
+
 class Console extends React.Component {
   constructor(props) {
     super(props);
@@ -48,23 +64,18 @@ class Console extends React.Component {
   handleChange(e) {
     let splittedCommand = e.target.value.split(' ');
 
-    if (splittedCommand[0] === 'cat') {
-      const file = fileMap.get(splittedCommand[1]);
-      if (file) {
-        this.setState({
-          userInput: <File name={file.name} content={file.content} command='cat'/>
-        });
-      }
-      else {
-        this.setState({
-          userInput: <OutputLine content={`user: ${e.target.value}`}/>
-        });
-      }
+    let command = splittedCommand[0];
+    let handler = commandHandlerMap.get(command);
+    
+    if (handler) {
+      this.setState({
+        userInput: handler(splittedCommand[1])
+      })
     }
     else {
       this.setState({
         userInput: <OutputLine content={`user: ${e.target.value}`}/>
-      });
+      })
     }
   }
 
