@@ -1,52 +1,9 @@
 import React from 'react';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
-import './App.css';
-
-function OutputLine(props) {
-  return (
-    <p>{props.content}</p>
-  )
-}
-
-function File(props) {
-  let toOutput;
-  switch (props.command) {
-    case 'cat':
-      toOutput = props.content;
-      break;
-    default:
-      toOutput = props.name;
-  }
-  return (
-    <p>{toOutput}</p>
-  )
-}
-
-const fileMap = new Map();
-fileMap.set('gluck.txt', {
-  name: 'gluck.txt',
-  content: 'new line \n'
-});
-fileMap.set('bar.txt', {
-  name: 'bar.txt',
-  content: 'i am bar \n'
-});
-
-const commandHandlerMap = new Map();
-commandHandlerMap.set('cat', (...args) => {
-  const file = fileMap.get(args[0]);
-  if (file) {
-    return <File name={file.name} content={file.content} command='cat'/>
-  }
-  return <OutputLine content={`cat: ${args[args.length - 1]}: No such file or directory`}/>
-})
-commandHandlerMap.set('ls', (...args) => {
-  let files = [];
-  fileMap.forEach((file) => {
-    files.push(<File name={file.name} content={file.content} command='ls'/>);
-  })
-  return files;
-})
+import '../App.css';
+import OutputLine from '../components/OutputLine';
+import fileMap from '../mappers/fileMap';
+import commandHandlerMap from '../mappers/commandHandlerMap';
 
 class Console extends React.Component {
   constructor(props) {
@@ -98,12 +55,4 @@ class Console extends React.Component {
   }
 }
 
-function App() {
-  return (
-    <div className="App">
-      <Console />
-    </div>
-  );
-}
-
-export default App;
+export default Console;
