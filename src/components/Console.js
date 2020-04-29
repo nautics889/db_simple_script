@@ -9,9 +9,10 @@ class Console extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userInput: '...',
-      outputArray: [<OutputLine content='initial command'/>, 
-                    <OutputLine content='second command'/>],
+      rawUserInput: '...',
+      handledUserInput: undefined,
+      outputArray: [<OutputLine content='Welcome to my web-terminal!'/>, 
+                    <OutputLine content="At present I know only following commands: cat, ls, cd"/>],
       files: fileMap,
     };
 
@@ -19,6 +20,8 @@ class Console extends React.Component {
   }
 
   handleChange(e) {
+    this.setState({rawUserInput: e.target.value});
+
     let splittedCommand = e.target.value.split(' ');
 
     let command = splittedCommand[0];
@@ -26,12 +29,12 @@ class Console extends React.Component {
     
     if (handler) {
       this.setState({
-        userInput: handler(splittedCommand[1])
+        handledUserInput: handler(splittedCommand[1])
       })
     }
     else {
       this.setState({
-        userInput: <OutputLine content={`user: ${e.target.value}`}/>
+        handledUserInput: <OutputLine content={`user: command not found: ${e.target.value}`}/>
       })
     }
   }
@@ -44,11 +47,28 @@ class Console extends React.Component {
           handleKeys={['enter']}
           handleFocusableElements={true}
           onKeyEvent={(key, e) => {
-            let newOutput = [...this.state.outputArray, this.state.userInput];
+            let newOutput = [...this.state.outputArray, this.state.handledUserInput];
             this.setState({outputArray: newOutput});
           }} />
+        <KeyboardEventHandler
+          handleKeys={['tab']}
+          handleFocusableElements={true}
+          onKeyEvent={(key, e) => {
+            let availableCommands = Array.from(commandHandlerMap.keys());
+            let suitableCommands = availableCommands.filter((el, index, arr) => { if (el.startsWith(this.state.rawUserInput)) { return el; } }, this);
+            if (suitableCommands == 0) {
+              return
+            } else if (suitableCommands.length == 1) {
+              document.getElementById("userInput").value = suitableCommands;
+            } else if (suitableCommands.length > 1) {
+              this.setState({
+                outputArray: [...this.state.outputArray, <OutputLine content={suitableCommands.join('        ')}/>]
+              });
+            }
+          }} />
         <div>
-          <input type="text" defaultValue={this.state.userInput} onChange={this.handleChange} />
+          <label for="userInput">guest@nautics-desktop ~/ % </label>
+          <input id="userInput" type="text" defaultValue={this.state.rawUserInput} onChange={this.handleChange} />
         </div>
       </div>
     )
