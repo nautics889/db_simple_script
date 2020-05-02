@@ -17,12 +17,11 @@ class Console extends React.Component {
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.processInput = this.processInput.bind(this);
   }
 
-  handleChange(e) {
-    this.setState({rawUserInput: e.target.value});
-
-    let splittedCommand = e.target.value.split(' ');
+  processInput(userInput) {
+    let splittedCommand = userInput.split(' ');
 
     let command = splittedCommand[0];
     let handler = commandHandlerMap.get(command);
@@ -34,9 +33,14 @@ class Console extends React.Component {
     }
     else {
       this.setState({
-        handledUserInput: <OutputLine content={`user: command not found: ${e.target.value}`}/>
+        handledUserInput: <OutputLine content={`user: command not found: ${userInput}`}/>
       })
     }
+  }
+
+  handleChange(e) {
+    this.setState({rawUserInput: e.target.value});
+    this.processInput(e.target.value);
   }
 
   render() {
@@ -54,12 +58,23 @@ class Console extends React.Component {
           handleKeys={['tab']}
           handleFocusableElements={true}
           onKeyEvent={(key, e) => {
-            let availableCommands = Array.from(commandHandlerMap.keys());
-            let suitableCommands = availableCommands.filter((el, index, arr) => { if (el.startsWith(this.state.rawUserInput)) { return el; } }, this);
+            let availableCommands = [...commandHandlerMap.keys(), ...fileMap.keys()];
+            let suitableCommands = availableCommands.filter((el, index, arr) => {
+              let wordToComplete = this.state.rawUserInput.split(" ").pop();
+              if (el.startsWith(wordToComplete)) { return el; } 
+            }, this);
             if (suitableCommands == 0) {
               return
             } else if (suitableCommands.length == 1) {
-              document.getElementById("userInput").value = suitableCommands;
+              let currentSplittedInput = this.state.rawUserInput.split(" ");
+              let completedInput;
+              if (currentSplittedInput.length > 1) {
+                completedInput = `${currentSplittedInput.slice(0, -1).join(" ")} ${suitableCommands.pop()}`
+              } else {
+                completedInput = suitableCommands.pop();
+              }
+              document.getElementById("userInput").value = completedInput;
+              this.processInput(completedInput);
             } else if (suitableCommands.length > 1) {
               this.setState({
                 outputArray: [...this.state.outputArray, <OutputLine content={suitableCommands.join('        ')}/>]
