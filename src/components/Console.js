@@ -5,6 +5,7 @@ import OutputLine from '../components/OutputLine';
 import fileMap from '../mappers/fileMap';
 import commandHandlerMap from '../mappers/commandHandlerMap';
 
+
 class Console extends React.Component {
   constructor(props) {
     super(props);
@@ -16,6 +17,9 @@ class Console extends React.Component {
       files: fileMap,
     };
 
+    this.setUserInputElemRef = element => {
+      this.userInputElem = element;
+    };
     this.handleChange = this.handleChange.bind(this);
     this.processInput = this.processInput.bind(this);
   }
@@ -51,13 +55,15 @@ class Console extends React.Component {
           handleKeys={['enter']}
           handleFocusableElements={true}
           onKeyEvent={(key, e) => {
-            let newOutput = [...this.state.outputArray, this.state.handledUserInput];
+            let newOutput = [...this.state.outputArray, `guest@nautics-desktop ~/ % ${this.userInputElem.value}`, this.state.handledUserInput];
             this.setState({outputArray: newOutput});
           }} />
         <KeyboardEventHandler
           handleKeys={['tab']}
           handleFocusableElements={true}
           onKeyEvent={(key, e) => {
+            e.preventDefault();
+
             let availableCommands = [...commandHandlerMap.keys(), ...fileMap.keys()];
             let suitableCommands = availableCommands.filter((el, index, arr) => {
               let wordToComplete = this.state.rawUserInput.split(" ").pop();
@@ -73,7 +79,7 @@ class Console extends React.Component {
               } else {
                 completedInput = suitableCommands.pop();
               }
-              document.getElementById("userInput").value = completedInput;
+              this.userInputElem.value = completedInput;
               this.processInput(completedInput);
             } else if (suitableCommands.length > 1) {
               this.setState({
@@ -83,7 +89,9 @@ class Console extends React.Component {
           }} />
         <div>
           <label for="userInput">guest@nautics-desktop ~/ % </label>
-          <input id="userInput" type="text" defaultValue={this.state.rawUserInput} onChange={this.handleChange} />
+          <span class="input-wrapper">
+            <input id="userInput" type="text" ref={this.setUserInputElemRef} defaultValue={this.state.rawUserInput} onChange={this.handleChange} />
+          </span>
         </div>
       </div>
     )

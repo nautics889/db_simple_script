@@ -14,3 +14,21 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+label {
+  float: left;
+}
+
+input {
+  width: 100%;
+  background-color: #000;
+  color: #fff;
+  font-family: monospace;
+  padding: 0 0 0 0.7em;
+  border: none;
+}
+
+.input-wrapper {
+  display: block;
+  overflow: hidden;
+}
